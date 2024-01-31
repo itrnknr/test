@@ -1,17 +1,24 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+import telebot
+import requests
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+token = "telegram_bot_token"
+weather_api_key = "weather_api_key"
+bot = telebot.TeleBot(token)
 
+@bot.message_handler(commands=['start'])
+def greet_humam(message):
+    bot.send_message(message.chat.id, "Hello!")
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+@bot.message_handler(commands=['get_weather'])
+def get_weather(message):
+    url = f'https://pro.openweathermap.org/data/2.5/forecast/hourly?lat={59.937}&lon={30.308}&appid={weather_api_key}'
+    response = requests.get(url)
+    status = response.status_code
+    if status==200:
+        weather = response.json()
+        bot.send_message(message.chat.id, weather["weather"][0]["description"])
+    else:
+        bot.send_message(message.chat.id, "weather is not available")
 
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+bot.polling()
